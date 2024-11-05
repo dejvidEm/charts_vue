@@ -1,0 +1,32 @@
+
+
+* {
+    margin: 0;
+    box-sizing: border-box;
+}
+
+.burger-bar {
+    transition: transform 0.5s ease; 
+}
+
+.burger-bar.clicked:nth-child(1) {
+    transform: rotate(45deg) translate(0.75em, 1.25em);
+}
+
+.burger-bar.clicked:nth-child(2) {
+    transform: scale(0.1);
+}
+
+.burger-bar.clicked:nth-child(3) {
+    transform: rotate(135deg) translate(-0.5em, 1em);
+}
+
+.burger-bar.unclicked {
+    transform: rotate(0) translate(0);
+}
+
+
+.menu {
+    transition: transform 0.5s ease;
+}
+
