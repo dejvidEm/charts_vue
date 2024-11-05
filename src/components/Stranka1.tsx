@@ -78,7 +78,7 @@ const DynamicXMLChart: React.FC = () => {
   }, []);
 
   return (
-    <div className="container mx-auto px-4 mt-28 py-8">
+    <div className="container mx-auto px-4 mt-28 mb-4 py-8">
       <div className="flex flex-wrap justify-center gap-6 mb-6">
         {data.map((zaznam, index) => {
           const chartData = [
