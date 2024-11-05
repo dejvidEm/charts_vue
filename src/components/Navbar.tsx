@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom"; 
+import "./Navbar.css";
 
 const Navbar: React.FC = () => {
     const [burgerClass, setBurgerClass] = useState<string>("burger-bar unclicked");
@@ -13,13 +14,13 @@ const Navbar: React.FC = () => {
     return (
         <div className="w-full h-auto fixed top-0 left-0 z-[9999999]">
             <nav className="w-full h-20 bg-gray-800 flex justify-start p-4 z-10">
-                <div className="burger-menu ml-4 h-full w-16 flex flex-col items-start justify-between cursor-pointer" onClick={updateMenu}>
+                <div className="burger-menu ml-4 h-full w-12 flex flex-col items-start justify-between cursor-pointer" onClick={updateMenu}>
                     <div className={`${burgerClass} w-12 h-2 bg-blue-500 rounded transition-transform duration-500`} />
                     <div className={`${burgerClass} w-12 h-2 bg-blue-500 rounded transition-transform duration-500`} />
                     <div className={`${burgerClass} w-12 h-2 bg-blue-500 rounded transition-transform duration-500`} />
                 </div>
                 <h1 className="font-bold text-white text-center flex-1 text-3xl">
-                    Nadpis vikimanovej stránky
+                    GraphApp
                 </h1>
                 <div className="w-16"></div>
             </nav>

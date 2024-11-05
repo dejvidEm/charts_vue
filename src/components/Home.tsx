@@ -26,7 +26,7 @@ const LandingPage = () => {
       </div>
 
       <div className="flex flex-col items-center space-y-4">
-        <Link to="/stranka1" className="text-white">Prehliadaj teraz</Link>
+        <Link to="/stranka1" className="text-purple">Prehliadaj teraz</Link>
       </div>
     </div>
   );

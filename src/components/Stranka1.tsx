@@ -25,6 +25,13 @@ const PASTEL_COLORS = [
 ];
 
 const DynamicXMLChart: React.FC = () => {
+  const scrollToTop = () => {
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth' // Plynulý posun
+    });
+  };
+
   const [data, setData] = useState<Zaznam[]>([]);
   const [chartType, setChartType] = useState<"bar" | "pie">("bar");
 
@@ -58,7 +65,7 @@ const DynamicXMLChart: React.FC = () => {
   }, []);
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="container mx-auto px-4 mt-20 py-8">
       <div className="flex flex-wrap justify-center gap-6 mb-6">
         {data.map((zaznam, index) => {
           const chartData = [
@@ -126,13 +133,13 @@ const DynamicXMLChart: React.FC = () => {
 
       <div className="flex justify-center mt-4 space-x-2">
         <button
-          onClick={() => setChartType("bar")}
+          onClick={() => { setChartType("bar"); scrollToTop(); }}
           className={`px-4 py-2 font-bold ${chartType === "bar" ? "bg-[#3F37C9] text-white" : "bg-gray-200 text-[#3F37C9]"} rounded-xl`}
         >
           Stĺpcový
         </button>
         <button
-          onClick={() => setChartType("pie")}
+          onClick={() => { setChartType("pie"); scrollToTop(); }}
           className={`px-4 py-2 font-bold ${chartType === "pie" ? "bg-[#3F37C9] text-white" : "bg-gray-200 text-[#3F37C9]"} rounded-xl`}
         >
           Koláčové
