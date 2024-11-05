@@ -34,6 +34,7 @@ const DynamicXMLChart: React.FC = () => {
 
   const [data, setData] = useState<Zaznam[]>([]);
   const [chartType, setChartType] = useState<"bar" | "pie">("bar");
+  const [isMobile, setIsMobile] = useState<boolean>(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -64,6 +65,18 @@ const DynamicXMLChart: React.FC = () => {
     fetchData();
   }, []);
 
+  // Detect screen size and set isMobile accordingly
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth <= 768); // 768px is typical mobile breakpoint
+    };
+
+    window.addEventListener('resize', handleResize);
+    handleResize(); // Call once on mount to set initial state
+
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
   return (
     <div className="container mx-auto px-4 mt-28 py-8">
       <div className="flex flex-wrap justify-center gap-6 mb-6">
@@ -79,16 +92,20 @@ const DynamicXMLChart: React.FC = () => {
           ];
 
           return (
-            <div key={index} className="bg-white shadow-lg p-6 rounded-lg" style={{ width: "300px" }}>
+            <div key={index} className={`bg-white shadow-lg p-6 rounded-lg ${isMobile ? "w-full" : "w-80"}`}>
               <h2 className="text-center text-lg font-bold mb-4">{zaznam.rok}</h2>
               <ResponsiveContainer width="100%" height={300}>
                 {chartType === "bar" ? (
-                  <BarChart data={chartData} margin={{ top: 5, right: 20, left: 20, bottom: 5 }}>
+                  <BarChart
+                    data={chartData}
+                    margin={{ top: 5, right: 20, left: 20, bottom: 5 }}
+                    layout={isMobile ? "vertical" : "horizontal"} // Dynamicky mení orientáciu
+                  >
                     <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis type="category" dataKey="name" tick={{ fontSize: 12 }} />
-                    <YAxis type="number" tick={{ fontSize: 12 }} />
+                    <XAxis type={isMobile ? "number" : "category"} tick={{ fontSize: 12 }} />
+                    <YAxis type={isMobile ? "category" : "number"} tick={{ fontSize: 12 }} />
                     <Tooltip />
-                    <Bar dataKey="value" barSize={30}>
+                    <Bar dataKey="value" barSize={isMobile ? 50 : 30}> {/* Širší bar na mobile */}
                       {chartData.map((_entry, index) => (
                         <Cell key={`bar-cell-${index}`} fill={PASTEL_COLORS[index % PASTEL_COLORS.length]} />
                       ))}
@@ -114,7 +131,7 @@ const DynamicXMLChart: React.FC = () => {
                 )}
               </ResponsiveContainer>
 
-              {/* Statická legenda, mal som problém s implementovaním kvôli duplicitnemu kódu */}
+              {/* Statická legenda */}
               <div className="flex flex-wrap justify-center mt-4">
                 {chartData.map((entry, index) => (
                   <div key={index} className="flex items-center mr-4 mb-2">
