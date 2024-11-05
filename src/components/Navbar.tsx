@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom"; 
-import './navbar.css';
 
 const Navbar: React.FC = () => {
     const [burgerClass, setBurgerClass] = useState<string>("burger-bar unclicked");
