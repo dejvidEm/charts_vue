@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from "react";
 import {
-  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
-  PieChart, Pie, Cell
+  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell,
+  PieChart, Pie,
+  LineChart, Line
 } from "recharts";
 
 interface Hodnotenie {
@@ -19,7 +20,7 @@ interface Zaznam {
   hodnotenie: Hodnotenie;
 }
 
-// Pastel color palette
+
 const PASTEL_COLORS = [
   "#F72585", "#B5179E", "#7209B7", "#3A0CA3", "#3F37C9", "#4361EE", "#4895EF", "#4CC9F0"
 ];
@@ -28,12 +29,12 @@ const DynamicXMLChart: React.FC = () => {
   const scrollToTop = () => {
     window.scrollTo({
       top: 0,
-      behavior: 'smooth' // Plynulý posun
+      behavior: 'smooth' 
     });
   };
 
   const [data, setData] = useState<Zaznam[]>([]);
-  const [chartType, setChartType] = useState<"bar" | "pie">("bar");
+  const [chartType, setChartType] = useState<"bar" | "pie" | "line">("bar");
   const [isMobile, setIsMobile] = useState<boolean>(false);
 
   useEffect(() => {
@@ -65,23 +66,34 @@ const DynamicXMLChart: React.FC = () => {
     fetchData();
   }, []);
 
-  // Detect screen size and set isMobile accordingly
   useEffect(() => {
     const handleResize = () => {
-      setIsMobile(window.innerWidth <= 768); // 768px is typical mobile breakpoint
+      setIsMobile(window.innerWidth <= 768);
     };
 
     window.addEventListener('resize', handleResize);
-    handleResize(); // Call once on mount to set initial state
+    handleResize(); 
 
     return () => window.removeEventListener('resize', handleResize);
   }, []);
+
+
+  const chartData = data.map(zaznam => ({
+    rok: zaznam.rok,
+    A: zaznam.hodnotenie.A,
+    B: zaznam.hodnotenie.B,
+    C: zaznam.hodnotenie.C,
+    D: zaznam.hodnotenie.D,
+    E: zaznam.hodnotenie.E,
+    FX: zaznam.hodnotenie.FX,
+    FN: zaznam.hodnotenie.FN,
+  }));
 
   return (
     <div className="container mx-auto px-4 mt-28 mb-4 py-8">
       <div className="flex flex-wrap justify-center gap-6 mb-6">
         {data.map((zaznam, index) => {
-          const chartData = [
+          const chartDataForBarAndPie = [
             { name: 'A', value: zaznam.hodnotenie.A },
             { name: 'B', value: zaznam.hodnotenie.B },
             { name: 'C', value: zaznam.hodnotenie.C },
@@ -97,24 +109,24 @@ const DynamicXMLChart: React.FC = () => {
               <ResponsiveContainer width="100%" height={300}>
                 {chartType === "bar" ? (
                   <BarChart
-                    data={chartData}
+                    data={chartDataForBarAndPie}
                     margin={{ top: 5, right: 20, left: 20, bottom: 5 }}
-                    layout={isMobile ? "vertical" : "horizontal"} // Dynamicky mení orientáciu
+                    layout={isMobile ? "vertical" : "horizontal"}
                   >
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis type={isMobile ? "number" : "category"} tick={{ fontSize: 12 }} />
                     <YAxis type={isMobile ? "category" : "number"} tick={{ fontSize: 12 }} />
                     <Tooltip />
-                    <Bar dataKey="value" barSize={isMobile ? 50 : 30}> {/* Širší bar na mobile */}
-                      {chartData.map((_entry, index) => (
+                    <Bar dataKey="value" barSize={isMobile ? 50 : 30}>
+                      {chartDataForBarAndPie.map((_entry, index) => (
                         <Cell key={`bar-cell-${index}`} fill={PASTEL_COLORS[index % PASTEL_COLORS.length]} />
                       ))}
                     </Bar>
                   </BarChart>
-                ) : (
+                ) : chartType === "pie" ? (
                   <PieChart>
                     <Pie
-                      data={chartData}
+                      data={chartDataForBarAndPie}
                       dataKey="value"
                       nameKey="name"
                       cx="50%"
@@ -122,18 +134,31 @@ const DynamicXMLChart: React.FC = () => {
                       outerRadius={100}
                       label
                     >
-                      {chartData.map((_entry, index) => (
+                      {chartDataForBarAndPie.map((_entry, index) => (
                         <Cell key={`pie-cell-${index}`} fill={PASTEL_COLORS[index % PASTEL_COLORS.length]} />
                       ))}
                     </Pie>
                     <Tooltip />
                   </PieChart>
+                ) : (
+                  <LineChart data={chartData} margin={{ top: 5, right: 20, left: 20, bottom: 5 }}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="rok" tick={{ fontSize: 12 }} />
+                    <YAxis tick={{ fontSize: 12 }} />
+                    <Tooltip />
+                    <Line type="monotone" dataKey="A" stroke={PASTEL_COLORS[0]} strokeWidth={3} />
+                    <Line type="monotone" dataKey="B" stroke={PASTEL_COLORS[1]} strokeWidth={3} />
+                    <Line type="monotone" dataKey="C" stroke={PASTEL_COLORS[2]} strokeWidth={3} />
+                    <Line type="monotone" dataKey="D" stroke={PASTEL_COLORS[3]} strokeWidth={3} />
+                    <Line type="monotone" dataKey="E" stroke={PASTEL_COLORS[4]} strokeWidth={3} />
+                    <Line type="monotone" dataKey="FX" stroke={PASTEL_COLORS[5]} strokeWidth={3} />
+                    <Line type="monotone" dataKey="FN" stroke={PASTEL_COLORS[6]} strokeWidth={3} />
+                  </LineChart>
                 )}
               </ResponsiveContainer>
 
-              {/* Statická legenda */}
               <div className="flex flex-wrap justify-center mt-4">
-                {chartData.map((entry, index) => (
+                {chartDataForBarAndPie.map((entry, index) => (
                   <div key={index} className="flex items-center mr-4 mb-2">
                     <div
                       className="w-4 h-4 rounded-full mr-2"
@@ -160,6 +185,12 @@ const DynamicXMLChart: React.FC = () => {
           className={`px-4 py-2 font-bold ${chartType === "pie" ? "bg-[#3F37C9] text-white" : "bg-gray-200 text-[#3F37C9]"} rounded-xl`}
         >
           Koláčové
+        </button>
+        <button
+          onClick={() => { setChartType("line"); scrollToTop(); }}
+          className={`px-4 py-2 font-bold ${chartType === "line" ? "bg-[#3F37C9] text-white" : "bg-gray-200 text-[#3F37C9]"} rounded-xl`}
+        >
+          Čiarový
         </button>
       </div>
     </div>
