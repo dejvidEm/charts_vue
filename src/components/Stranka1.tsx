@@ -2,7 +2,8 @@ import React, { useEffect, useState } from "react";
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell,
   PieChart, Pie,
-  LineChart, Line
+  LineChart, Line,
+  RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis
 } from "recharts";
 
 interface Hodnotenie {
@@ -20,7 +21,7 @@ interface Zaznam {
   hodnotenie: Hodnotenie;
 }
 
-
+// Pastel color palette
 const PASTEL_COLORS = [
   "#F72585", "#B5179E", "#7209B7", "#3A0CA3", "#3F37C9", "#4361EE", "#4895EF", "#4CC9F0"
 ];
@@ -29,12 +30,12 @@ const DynamicXMLChart: React.FC = () => {
   const scrollToTop = () => {
     window.scrollTo({
       top: 0,
-      behavior: 'smooth' 
+      behavior: 'smooth' // Plynulý posun
     });
   };
 
   const [data, setData] = useState<Zaznam[]>([]);
-  const [chartType, setChartType] = useState<"bar" | "pie" | "line">("bar");
+  const [chartType, setChartType] = useState<"bar" | "pie" | "line" | "radar">("bar");
   const [isMobile, setIsMobile] = useState<boolean>(false);
 
   useEffect(() => {
@@ -66,34 +67,23 @@ const DynamicXMLChart: React.FC = () => {
     fetchData();
   }, []);
 
+  // Detect screen size and set isMobile accordingly
   useEffect(() => {
     const handleResize = () => {
-      setIsMobile(window.innerWidth <= 768);
+      setIsMobile(window.innerWidth <= 768); // 768px is typical mobile breakpoint
     };
 
     window.addEventListener('resize', handleResize);
-    handleResize(); 
+    handleResize(); // Call once on mount to set initial state
 
     return () => window.removeEventListener('resize', handleResize);
   }, []);
-
-
-  const chartData = data.map(zaznam => ({
-    rok: zaznam.rok,
-    A: zaznam.hodnotenie.A,
-    B: zaznam.hodnotenie.B,
-    C: zaznam.hodnotenie.C,
-    D: zaznam.hodnotenie.D,
-    E: zaznam.hodnotenie.E,
-    FX: zaznam.hodnotenie.FX,
-    FN: zaznam.hodnotenie.FN,
-  }));
 
   return (
     <div className="container mx-auto px-4 mt-28 mb-4 py-8">
       <div className="flex flex-wrap justify-center gap-6 mb-6">
         {data.map((zaznam, index) => {
-          const chartDataForBarAndPie = [
+          const chartData = [
             { name: 'A', value: zaznam.hodnotenie.A },
             { name: 'B', value: zaznam.hodnotenie.B },
             { name: 'C', value: zaznam.hodnotenie.C },
@@ -109,16 +99,16 @@ const DynamicXMLChart: React.FC = () => {
               <ResponsiveContainer width="100%" height={300}>
                 {chartType === "bar" ? (
                   <BarChart
-                    data={chartDataForBarAndPie}
+                    data={chartData}
                     margin={{ top: 5, right: 20, left: 20, bottom: 5 }}
-                    layout={isMobile ? "vertical" : "horizontal"}
+                    layout={isMobile ? "vertical" : "horizontal"} // Dynamicky mení orientáciu
                   >
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis type={isMobile ? "number" : "category"} tick={{ fontSize: 12 }} />
                     <YAxis type={isMobile ? "category" : "number"} tick={{ fontSize: 12 }} />
                     <Tooltip />
-                    <Bar dataKey="value" barSize={isMobile ? 50 : 30}>
-                      {chartDataForBarAndPie.map((_entry, index) => (
+                    <Bar dataKey="value" barSize={isMobile ? 50 : 30}> {/* Širší bar na mobile */}
+                      {chartData.map((_entry, index) => (
                         <Cell key={`bar-cell-${index}`} fill={PASTEL_COLORS[index % PASTEL_COLORS.length]} />
                       ))}
                     </Bar>
@@ -126,7 +116,7 @@ const DynamicXMLChart: React.FC = () => {
                 ) : chartType === "pie" ? (
                   <PieChart>
                     <Pie
-                      data={chartDataForBarAndPie}
+                      data={chartData}
                       dataKey="value"
                       nameKey="name"
                       cx="50%"
@@ -134,31 +124,40 @@ const DynamicXMLChart: React.FC = () => {
                       outerRadius={100}
                       label
                     >
-                      {chartDataForBarAndPie.map((_entry, index) => (
+                      {chartData.map((_entry, index) => (
                         <Cell key={`pie-cell-${index}`} fill={PASTEL_COLORS[index % PASTEL_COLORS.length]} />
                       ))}
                     </Pie>
                     <Tooltip />
                   </PieChart>
-                ) : (
+                ) : chartType === "line" ? (
                   <LineChart data={chartData} margin={{ top: 5, right: 20, left: 20, bottom: 5 }}>
                     <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="rok" tick={{ fontSize: 12 }} />
+                    <XAxis dataKey="name" tick={{ fontSize: 12 }} />
                     <YAxis tick={{ fontSize: 12 }} />
                     <Tooltip />
-                    <Line type="monotone" dataKey="A" stroke={PASTEL_COLORS[0]} strokeWidth={3} />
-                    <Line type="monotone" dataKey="B" stroke={PASTEL_COLORS[1]} strokeWidth={3} />
-                    <Line type="monotone" dataKey="C" stroke={PASTEL_COLORS[2]} strokeWidth={3} />
-                    <Line type="monotone" dataKey="D" stroke={PASTEL_COLORS[3]} strokeWidth={3} />
-                    <Line type="monotone" dataKey="E" stroke={PASTEL_COLORS[4]} strokeWidth={3} />
-                    <Line type="monotone" dataKey="FX" stroke={PASTEL_COLORS[5]} strokeWidth={3} />
-                    <Line type="monotone" dataKey="FN" stroke={PASTEL_COLORS[6]} strokeWidth={3} />
+                    <Line type="monotone" dataKey="value" stroke="#3F37C9" strokeWidth={3} />
                   </LineChart>
+                ) : (
+                  <RadarChart data={chartData}>
+                    <PolarGrid />
+                    <PolarAngleAxis dataKey="name" />
+                    <PolarRadiusAxis angle={30} domain={[0, 100]} />
+                    <Radar
+                      name="Hodnotenie"
+                      dataKey="value"
+                      stroke="#3F37C9"
+                      fill="#3F37C9"
+                      fillOpacity={0.6}
+                    />
+                    <Tooltip />
+                  </RadarChart>
                 )}
               </ResponsiveContainer>
 
+              {/* Statická legenda */}
               <div className="flex flex-wrap justify-center mt-4">
-                {chartDataForBarAndPie.map((entry, index) => (
+                {chartData.map((entry, index) => (
                   <div key={index} className="flex items-center mr-4 mb-2">
                     <div
                       className="w-4 h-4 rounded-full mr-2"
